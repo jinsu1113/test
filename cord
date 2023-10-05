@@ -1,0 +1,74 @@
+let img; // image object
+let angle = 10; // Rotation angle (degrees) (can be rotated by adjusting the value)
+let scaleValue = 0.5; // Reduce/enlarge ratio
+
+function preload() {
+  img = loadImage('test.png');
+}
+
+function setup() {
+  createCanvas(800, 800);
+  angleMode(DEGREES); // set angle mode
+  imageMode(CENTER); // set image drawing mode to center
+}
+
+function draw() {
+  background(220);
+
+  // Check if the image is fully loaded
+  if (img) {
+    // Move the image to the center of the canvas
+    translate(width / 2, height / 2);
+
+    // Apply a user-defined transformation matrix to straighten the image
+    let correctedAngle = -angle; // Invert the rotation angle
+    let correctedScale = 1 / scaleValue; // Invert the scaling factor
+
+    // Apply rotation and scaling to the image
+    rotate(correctedAngle);
+    scale(correctedScale);
+
+    // Calculate the maximum size that the image can have without going out of bounds
+    let maxImageSize = Math.min(width, height);
+
+    // Calculate the cropping dimensions to fit the image within the canvas
+    let cropWidth = img.width;
+    let cropHeight = img.height;
+
+    if (cropWidth > maxImageSize) {
+      cropWidth = maxImageSize;
+      cropHeight = cropWidth * (img.height / img.width);
+    }
+
+    if (cropHeight > maxImageSize) {
+      cropHeight = maxImageSize;
+      cropWidth = cropHeight * (img.width / img.height);
+    }
+
+    // Draw the cropped image
+    image(img, 0, 0, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+
+    // Binarize the image
+    binarizeImage();
+  }
+}
+function binarizeImage() {
+  loadPixels();
+  for (let i = 0; i < pixels.length; i += 4) {
+    // Calculate grayscale value for each pixel
+    let grayscale = red(pixels[i]) * 0.1 + green(pixels[i + 1]) *0.5 + blue(pixels[i + 2]) * 0.1;
+
+    // Set pixel color to black or white based on a threshold (e.g., 128)
+    if (grayscale < 128) {
+      pixels[i] = 0; // R
+      pixels[i + 1] = 0; // G
+      pixels[i + 2] = 0; // B
+    } else {
+      pixels[i] = 255; // R
+      pixels[i + 1] = 255; // G
+      pixels[i + 2] = 255; // B
+    }
+  }
+
+  updatePixels();
+}
